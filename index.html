@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BSIT Students Grading System</title>
+
+<style>
+
+body{
+font-family:serif;
+background:black;
+color:white;
+margin:0;
+padding:20px;
+}
+
+.container{
+max-width:1300px;
+margin:auto;
+}
+
+h1,h2{
+text-align:center;
+color:#c084fc;
+}
+
+.section{
+background:#111;
+padding:20px;
+border-radius:10px;
+margin-bottom:30px;
+border:2px solid purple;
+overflow-x:auto;
+}
+
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+}
+
+input{
+width:100%;
+padding:8px;
+margin-top:5px;
+border-radius:5px;
+border:1px solid purple;
+font-family:serif;
+}
+
+.search{
+margin-top:15px;
+margin-bottom:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+border:1px solid purple;
+padding:8px;
+text-align:center;
+font-size:14px;
+}
+
+th{
+background:purple;
+}
+
+.grade-input{
+width:60px;
+text-align:center;
+}
+
+button{
+padding:6px 10px;
+background:purple;
+border:none;
+color:white;
+cursor:pointer;
+border-radius:5px;
+margin:2px;
+font-size:12px;
+}
+
+button:hover{
+background:#a855f7;
+}
+
+.pass{
+color:#4ade80;
+font-weight:bold;
+}
+
+.fail{
+color:#f87171;
+font-weight:bold;
+}
+
+.top-student{
+background:lightyellow;
+color:black;
+font-weight:bold;
+}
+
+.actions{
+display:flex;
+flex-direction:column;
+gap:4px;
+align-items:center;
+}
+
+@media(max-width:900px){
+
+table{
+font-size:12px;
+}
+
+.grade-input{
+width:45px;
+}
+
+.actions{
+flex-direction:row;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="section">
+
+<h1>BSIT STUDENTS GRADING SYSTEM</h1>
+
+<label>Student Name</label>
+<input id="studentName" type="text">
+
+<label>Course/Yr&Sec</label>
+<input id="course" type="text">
+
+<table>
+
+<tr>
+<th>Course No.</th>
+<th>Descriptive Title</th>
+<th>Grades</th>
+</tr>
+
+<tr>
+<td>IAS302</td>
+<td>Information Assurance & Security 2</td>
+<td><input class="grade-input" type="number"></td>
+</tr>
+
+<tr>
+<td>SA301</td>
+<td>System Administration & Maintenance</td>
+<td><input class="grade-input" type="number"></td>
+</tr>
+
+<tr>
+<td>SIA302</td>
+<td>System Integration & Architecture 2</td>
+<td><input class="grade-input" type="number"></td>
+</tr>
+
+<tr>
+<td>ITELEC3</td>
+<td>IT ELEC 3 (Web App & Dev)</td>
+<td><input class="grade-input" type="number"></td>
+</tr>
+
+<tr>
+<td>ITELEC4</td>
+<td>IT ELEC 4 (Mobile App & Dev)</td>
+<td><input class="grade-input" type="number"></td>
+</tr>
+
+<tr>
+<td>CAP301</td>
+<td>Capstone 1</td>
+<td><input class="grade-input" type="number"></td>
+</tr>
+
+</table>
+
+<button onclick="submitGrades()">Submit</button>
+
+</div>
+
+
+<div class="section">
+
+<h2>STUDENT RECORDS</h2>
+
+<input class="search" type="text" id="search" placeholder="Search student..." onkeyup="searchStudent()">
+
+<table>
+
+<tr>
+<th>Name</th>
+<th>Yr&Sec</th>
+<th>IAS302</th>
+<th>SA301</th>
+<th>SIA302</th>
+<th>ITELEC3</th>
+<th>ITELEC4</th>
+<th>CAP301</th>
+<th>Average</th>
+<th>Remarks</th>
+<th>Actions</th>
+</tr>
+
+<tbody id="records"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+let records = JSON.parse(localStorage.getItem("records")) || [];
+
+displayRecords();
+
+function submitGrades(){
+
+let name=document.getElementById("studentName").value;
+let course=document.getElementById("course").value;
+let grades=document.querySelectorAll(".grade-input");
+
+let values=[];
+let total=0;
+
+grades.forEach(g=>{
+
+let val=parseFloat(g.value)||0;
+
+values.push(val);
+
+total+=val;
+
+});
+
+let avg=(total/6).toFixed(2);
+
+let remarks=avg>=75?"Passed":"Failed";
+
+records.push({name,course,values,avg,remarks});
+
+localStorage.setItem("records",JSON.stringify(records));
+
+displayRecords();
+
+clearInputs();
+
+}
+
+function displayRecords(){
+
+let table=document.getElementById("records");
+
+table.innerHTML="";
+
+let highest=0;
+
+records.forEach(r=>{
+if(parseFloat(r.avg)>highest){
+highest=r.avg;
+}
+});
+
+records.forEach((r,i)=>{
+
+let remarkClass=r.remarks=="Passed"?"pass":"fail";
+
+let topClass=r.avg==highest?"top-student":"";
+
+table.innerHTML+=`
+
+<tr class="${topClass}">
+
+<td>${r.name}</td>
+<td>${r.course}</td>
+
+<td>${r.values[0]}</td>
+<td>${r.values[1]}</td>
+<td>${r.values[2]}</td>
+<td>${r.values[3]}</td>
+<td>${r.values[4]}</td>
+<td>${r.values[5]}</td>
+
+<td>${r.avg}</td>
+
+<td class="${remarkClass}">${r.remarks}</td>
+
+<td>
+
+<div class="actions">
+
+<button onclick="editStudent(${i})">Edit</button>
+
+<button onclick="deleteStudent(${i})">Delete</button>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+function deleteStudent(i){
+
+records.splice(i,1);
+
+localStorage.setItem("records",JSON.stringify(records));
+
+displayRecords();
+
+}
+
+function editStudent(i){
+
+let r=records[i];
+
+document.getElementById("studentName").value=r.name;
+document.getElementById("course").value=r.course;
+
+let grades=document.querySelectorAll(".grade-input");
+
+for(let j=0;j<6;j++){
+grades[j].value=r.values[j];
+}
+
+deleteStudent(i);
+
+}
+
+function clearInputs(){
+
+document.getElementById("studentName").value="";
+document.getElementById("course").value="";
+document.querySelectorAll(".grade-input").forEach(g=>g.value="");
+
+}
+
+function searchStudent(){
+
+let input=doc
